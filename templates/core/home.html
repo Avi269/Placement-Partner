@@ -1,0 +1,239 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Placement Partner - Your AI Career Companion{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-4">
+                    Your AI-Powered <span class="text-gradient">Career Companion</span>
+                </h1>
+                <p class="lead mb-4">
+                    Transform your job search with intelligent resume optimization, 
+                    job matching, and offer analysis powered by advanced AI technology.
+                </p>
+                <div class="d-flex flex-wrap gap-3">
+                    <a href="{% url 'resume_upload' %}" class="btn btn-light btn-lg">
+                        <i class="fas fa-upload me-2"></i>Upload Resume
+                    </a>
+                    <a href="{% url 'job_matching' %}" class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-search me-2"></i>Find Jobs
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center">
+                <div class="position-relative">
+                    <div class="bg-white rounded-circle p-4 d-inline-block shadow-lg">
+                        <i class="fas fa-briefcase text-primary" style="font-size: 4rem;"></i>
+                    </div>
+                    <div class="position-absolute top-50 translate-middle" style="left: 370px;">
+                        <div class="bg-success rounded-circle p-2">
+                            <i class="fas fa-check text-white p-2"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold mb-3">Why Choose Placement Partner?</h2>
+            <p class="lead">Comprehensive tools to accelerate your career growth</p>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-3">
+                <div class="feature-card animate-on-scroll">
+                    <i class="fas fa-file-alt"></i>
+                    <h3>Resume Optimization</h3>
+                    <p>AI-powered resume parsing and ATS optimization to increase your interview chances.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="feature-card animate-on-scroll">
+                    <i class="fas fa-search"></i>
+                    <h3>Job Matching</h3>
+                    <p>Intelligent job matching with skill gap analysis and personalized recommendations.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="feature-card animate-on-scroll">
+                    <i class="fas fa-envelope"></i>
+                    <h3>Cover Letters</h3>
+                    <p>Generate compelling, job-specific cover letters tailored to your experience.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="feature-card animate-on-scroll">
+                    <i class="fas fa-file-contract"></i>
+                    <h3>Offer Analysis</h3>
+                    <p>Analyze offer letters for risks, benefits, and negotiation opportunities.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold mb-3">How It Works</h2>
+            <p class="lead">Simple steps to boost your career</p>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                            <span class="text-white fw-bold">1</span>
+                        </div>
+                        <h4>Upload Your Resume</h4>
+                        <p class="text-muted-rm">Upload your resume in PDF or DOCX format. Our AI will parse and extract key information.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                            <span class="text-white fw-bold">2</span>
+                        </div>
+                        <h4>Find Perfect Matches</h4>
+                        <p class="text-muted-rm">Get job recommendations based on your skills and experience with detailed fit scores.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                            <span class="text-white fw-bold">3</span>
+                        </div>
+                        <h4>Land Your Dream Job</h4>
+                        <p class="text-muted-rm">Generate cover letters and analyze offers to make informed career decisions.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <div class="stats-number">95%</div>
+                    <div class="stats-label">Success Rate</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <div class="stats-number">10K+</div>
+                    <div class="stats-label">Resumes Processed</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <div class="stats-number">500+</div>
+                    <div class="stats-label">Job Matches</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <div class="stats-number">24/7</div>
+                    <div class="stats-label">AI Support</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-5 bg-primary text-white">
+    <div class="container text-center">
+        <h2 class="display-5 fw-bold mb-3">Ready to Transform Your Career?</h2>
+        <p class="lead mb-4">Join thousands of professionals who have accelerated their job search with Placement Partner.</p>
+        <div class="d-flex flex-wrap justify-content-center gap-3">
+            <a href="{% url 'resume_upload' %}" class="btn btn-light btn-lg">
+                <i class="fas fa-rocket me-2"></i>Get Started Now
+            </a>
+            <a href="{% url 'job_matching' %}" class="btn btn-outline-light btn-lg">
+                <i class="fas fa-play me-2"></i>See Demo
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold mb-3">What Our Users Say</h2>
+            <p class="lead">Success stories from professionals like you</p>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+                                <i class="fas fa-user text-white"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-0">Sarah Johnson</h5>
+                                <small class="text-muted-rm">Software Engineer</small>
+                            </div>
+                        </div>
+                        <p class="mb-0">"Placement Partner helped me optimize my resume and find the perfect job match. The AI analysis was incredibly accurate!"</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+                                <i class="fas fa-user text-white"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-0">Michael Chen</h5>
+                                <small class="text-muted-rm">Data Scientist</small>
+                            </div>
+                        </div>
+                        <p class="mb-0">"The cover letter generator saved me hours of work. Each letter was perfectly tailored to the job description."</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+                                <i class="fas fa-user text-white"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-0">Emily Rodriguez</h5>
+                                <small class="text-muted-rm">Product Manager</small>
+                            </div>
+                        </div>
+                        <p class="mb-0">"The offer analysis feature helped me negotiate better terms. I identified several red flags I would have missed."</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %} 

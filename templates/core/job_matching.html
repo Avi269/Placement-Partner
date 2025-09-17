@@ -1,0 +1,455 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Job Matching - Placement Partner{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Page Header -->
+            <div class="text-center mb-5">
+                <h1 class="display-5 fw-bold mb-3">Job Matching Analysis</h1>
+                <p class="lead text-muted">Find your perfect job match with AI-powered skill analysis</p>
+            </div>
+
+            <!-- Job Description Input -->
+            <div class="card shadow-lg mb-4">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-search me-2"></i>Job Description Analysis
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" data-validate="true" id="job-matching-form">
+                        {% csrf_token %}
+                        
+                        <div class="mb-4">
+                            <label for="job_title" class="form-label fw-bold">Job Title</label>
+                            <input type="text" name="title" id="job_title" class="form-control" 
+                                   placeholder="e.g., Senior Software Engineer" required>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="company" class="form-label fw-bold">Company Name</label>
+                            <input type="text" name="company" id="company" class="form-control" 
+                                   placeholder="e.g., Google, Microsoft, etc.">
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="job_description" class="form-label fw-bold">Job Description</label>
+                            <textarea name="description" id="job_description" class="form-control" rows="8" 
+                                      placeholder="Paste the complete job description here..." required></textarea>
+                            <div class="form-text">Include requirements, responsibilities, and preferred qualifications for better analysis.</div>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-magic me-2"></i>Analyze Job Match
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Results Section (Initially Hidden) -->
+            <div id="results-section" class="d-none">
+                <!-- Job Fit Score -->
+                <div class="card shadow-lg mb-4">
+                    <div class="card-header">
+                        <h4 class="mb-0">
+                            <i class="fas fa-chart-pie me-2"></i>Job Fit Analysis
+                        </h4>
+                    </div>
+                    <div class="card-body p-4 text-center">
+                        <div class="fit-score" id="job-fit-score">0%</div>
+                        <h5 class="mb-3">Overall Match Score</h5>
+                        <p class="text-muted">Based on your skills, experience, and the job requirements</p>
+                        
+                        <!-- Fit Score Breakdown -->
+                        <div class="row mt-4">
+                            <div class="col-md-4">
+                                <div class="stats-card">
+                                    <div class="stats-number" id="skills-match">0%</div>
+                                    <div class="stats-label">Skills Match</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="stats-card">
+                                    <div class="stats-number" id="experience-match">0%</div>
+                                    <div class="stats-label">Experience Match</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="stats-card">
+                                    <div class="stats-number" id="education-match">0%</div>
+                                    <div class="stats-label">Education Match</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Skills Analysis -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="card shadow-lg h-100">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-check-circle me-2 text-success"></i>Matching Skills
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="matching-skills" class="skill-tags-container">
+                                    <p class="text-muted">No matching skills found</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card shadow-lg h-100">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-exclamation-triangle me-2 text-warning"></i>Missing Skills
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="missing-skills" class="skill-tags-container">
+                                    <p class="text-muted">No missing skills identified</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recommendations -->
+                <div class="card shadow-lg mb-4">
+                    <div class="card-header">
+                        <h4 class="mb-0">
+                            <i class="fas fa-lightbulb me-2"></i>Recommendations
+                        </h4>
+                    </div>
+                    <div class="card-body p-4">
+                        <div id="recommendations">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h5>Skills to Develop</h5>
+                                    <ul id="skills-to-develop" class="list-unstyled">
+                                        <li class="mb-2">
+                                            <i class="fas fa-arrow-right text-primary me-2"></i>
+                                            <span>Loading recommendations...</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <h5>Learning Resources</h5>
+                                    <ul id="learning-resources" class="list-unstyled">
+                                        <li class="mb-2">
+                                            <i class="fas fa-arrow-right text-primary me-2"></i>
+                                            <span>Loading resources...</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="text-center mb-5">
+                    <a href="{% url 'cover_letter' %}" class="btn btn-success btn-lg me-3">
+                        <i class="fas fa-envelope me-2"></i>Generate Cover Letter
+                    </a>
+                    <a href="{% url 'resume_upload' %}" class="btn btn-outline-primary btn-lg">
+                        <i class="fas fa-edit me-2"></i>Optimize Resume
+                    </a>
+                </div>
+            </div>
+
+            <!-- Sample Job Descriptions -->
+            <div class="card shadow-lg">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-lightbulb me-2"></i>Sample Job Descriptions
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <p class="text-muted mb-3">Try these sample job descriptions to test the matching system:</p>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="card border">
+                                <div class="card-body">
+                                    <h6 class="card-title">Software Engineer</h6>
+                                    <p class="card-text small">Python, Django, React, AWS, Docker, SQL</p>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="loadSampleJob('software-engineer')">
+                                        Use This
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card border">
+                                <div class="card-body">
+                                    <h6 class="card-title">Data Scientist</h6>
+                                    <p class="card-text small">Python, Machine Learning, SQL, Pandas, Scikit-learn</p>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="loadSampleJob('data-scientist')">
+                                        Use This
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card border">
+                                <div class="card-body">
+                                    <h6 class="card-title">Product Manager</h6>
+                                    <p class="card-text small">Agile, User Research, Analytics, Strategy, Leadership</p>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="loadSampleJob('product-manager')">
+                                        Use This
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card border">
+                                <div class="card-body">
+                                    <h6 class="card-title">DevOps Engineer</h6>
+                                    <p class="card-text small">AWS, Docker, Kubernetes, CI/CD, Linux, Python</p>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="loadSampleJob('devops-engineer')">
+                                        Use This
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Processing Modal -->
+<div class="modal fade" id="processingModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center p-4">
+                <div class="loading-spinner mb-3"></div>
+                <h5>Analyzing Job Match</h5>
+                <p class="text-muted">Our AI is comparing your profile with the job requirements...</p>
+                <div class="progress">
+                    <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Sample job descriptions
+const sampleJobs = {
+    'software-engineer': {
+        title: 'Senior Software Engineer',
+        company: 'TechCorp Inc.',
+        description: `We are looking for a Senior Software Engineer to join our dynamic team.
+
+Requirements:
+- 5+ years of experience in software development
+- Proficiency in Python, JavaScript, and React
+- Experience with Django, AWS, and Docker
+- Strong knowledge of SQL and database design
+- Experience with CI/CD pipelines
+- Bachelor's degree in Computer Science or related field
+
+Responsibilities:
+- Develop and maintain web applications
+- Collaborate with cross-functional teams
+- Mentor junior developers
+- Participate in code reviews
+- Contribute to technical architecture decisions`
+    },
+    'data-scientist': {
+        title: 'Data Scientist',
+        company: 'DataTech Solutions',
+        description: `Join our data science team to build innovative machine learning solutions.
+
+Requirements:
+- 3+ years of experience in data science
+- Proficiency in Python, R, and SQL
+- Experience with Pandas, NumPy, and Scikit-learn
+- Knowledge of machine learning algorithms
+- Experience with data visualization tools
+- Master's degree in Statistics, Computer Science, or related field
+
+Responsibilities:
+- Develop predictive models
+- Analyze large datasets
+- Create data visualizations
+- Present findings to stakeholders
+- Collaborate with engineering teams`
+    },
+    'product-manager': {
+        title: 'Product Manager',
+        company: 'InnovateCorp',
+        description: `Lead product strategy and development for our growing platform.
+
+Requirements:
+- 4+ years of product management experience
+- Experience with Agile methodologies
+- Strong analytical and problem-solving skills
+- Excellent communication and leadership abilities
+- Experience with user research and analytics
+- Bachelor's degree in Business, Engineering, or related field
+
+Responsibilities:
+- Define product vision and strategy
+- Conduct user research and market analysis
+- Work with engineering teams on product development
+- Analyze product metrics and user feedback
+- Coordinate with marketing and sales teams`
+    },
+    'devops-engineer': {
+        title: 'DevOps Engineer',
+        company: 'CloudTech Systems',
+        description: `Build and maintain our cloud infrastructure and deployment pipelines.
+
+Requirements:
+- 3+ years of DevOps experience
+- Proficiency in AWS, Docker, and Kubernetes
+- Experience with CI/CD tools (Jenkins, GitLab CI)
+- Knowledge of Linux systems administration
+- Experience with Python and shell scripting
+- Bachelor's degree in Computer Science or related field
+
+Responsibilities:
+- Manage cloud infrastructure
+- Automate deployment processes
+- Monitor system performance
+- Implement security best practices
+- Collaborate with development teams`
+    }
+};
+
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('job-matching-form');
+    const resultsSection = document.getElementById('results-section');
+    const processingModal = new bootstrap.Modal(document.getElementById('processingModal'));
+
+    // Form submission
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Show processing modal
+        processingModal.show();
+        
+        // Simulate progress
+        const progressBar = document.querySelector('#processingModal .progress-bar');
+        let progress = 0;
+        const interval = setInterval(() => {
+            progress += Math.random() * 20;
+            if (progress >= 100) {
+                progress = 100;
+                clearInterval(interval);
+            }
+            progressBar.style.width = progress + '%';
+        }, 300);
+        
+        // Submit form
+        const formData = new FormData(form);
+        
+        fetch('{% url "job_matching" %}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            clearInterval(interval);
+            progressBar.style.width = '100%';
+            
+            setTimeout(() => {
+                processingModal.hide();
+                
+                if (data.success) {
+                    displayResults(data);
+                    PlacementPartner.showAlert('success', 'Job matching analysis completed!');
+                } else {
+                    PlacementPartner.showAlert('danger', data.message || 'An error occurred. Please try again.');
+                }
+            }, 1000);
+        })
+        .catch(error => {
+            clearInterval(interval);
+            processingModal.hide();
+            console.error('Error:', error);
+            PlacementPartner.showAlert('danger', 'An error occurred. Please try again.');
+        });
+    });
+
+    function displayResults(data) {
+        // Update fit score
+        PlacementPartner.updateJobFitScore(data.fit_score || 0);
+        
+        // Update breakdown scores
+        document.getElementById('skills-match').textContent = (data.skills_match || 0) + '%';
+        document.getElementById('experience-match').textContent = (data.experience_match || 0) + '%';
+        document.getElementById('education-match').textContent = (data.education_match || 0) + '%';
+        
+        // Update skills
+        PlacementPartner.createSkillTags(data.matching_skills || [], document.getElementById('matching-skills'), 'matching');
+        PlacementPartner.createSkillTags(data.missing_skills || [], document.getElementById('missing-skills'), 'missing');
+        
+        // Update recommendations
+        updateRecommendations(data.recommendations || {});
+        
+        // Show results
+        resultsSection.classList.remove('d-none');
+        resultsSection.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function updateRecommendations(recommendations) {
+        const skillsToDevelop = document.getElementById('skills-to-develop');
+        const learningResources = document.getElementById('learning-resources');
+        
+        skillsToDevelop.innerHTML = '';
+        learningResources.innerHTML = '';
+        
+        if (recommendations.skills_to_develop && recommendations.skills_to_develop.length > 0) {
+            recommendations.skills_to_develop.forEach(skill => {
+                const li = document.createElement('li');
+                li.className = 'mb-2';
+                li.innerHTML = `<i class="fas fa-arrow-right text-primary me-2"></i><span>${skill}</span>`;
+                skillsToDevelop.appendChild(li);
+            });
+        } else {
+            skillsToDevelop.innerHTML = '<li class="text-muted">No specific skills to develop identified</li>';
+        }
+        
+        if (recommendations.learning_resources && recommendations.learning_resources.length > 0) {
+            recommendations.learning_resources.forEach(resource => {
+                const li = document.createElement('li');
+                li.className = 'mb-2';
+                li.innerHTML = `<i class="fas fa-arrow-right text-primary me-2"></i><a href="${resource.url}" target="_blank">${resource.title}</a>`;
+                learningResources.appendChild(li);
+            });
+        } else {
+            learningResources.innerHTML = '<li class="text-muted">No learning resources available</li>';
+        }
+    }
+});
+
+// Load sample job descriptions
+function loadSampleJob(jobType) {
+    const job = sampleJobs[jobType];
+    if (job) {
+        document.getElementById('job_title').value = job.title;
+        document.getElementById('company').value = job.company;
+        document.getElementById('job_description').value = job.description;
+        
+        PlacementPartner.showAlert('info', 'Sample job description loaded! You can now analyze the match.');
+    }
+}
+</script>
+{% endblock %} 

@@ -1,0 +1,536 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Offer Letter Analysis - Placement Partner{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Page Header -->
+            <div class="text-center mb-5">
+                <h1 class="display-5 fw-bold mb-3">Offer Letter Analysis</h1>
+                <p class="lead text-muted">Analyze your job offers for risks, benefits, and negotiation opportunities</p>
+            </div>
+
+            <!-- Analysis Form -->
+            <div class="card shadow-lg mb-4">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-file-contract me-2"></i>Analyze Offer Letter
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" enctype="multipart/form-data" data-validate="true" id="offer-analysis-form">
+                        {% csrf_token %}
+                        
+                        <!-- File Upload Area -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Upload Offer Letter</label>
+                            <div class="file-upload-area" id="file-upload-area">
+                                <input type="file" name="file" id="offer-file" accept=".pdf,.docx,.doc,.txt" class="d-none">
+                                <div class="drop-text">
+                                    <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                                    <h5>Drag & Drop your offer letter here</h5>
+                                    <p class="text-muted mb-3">or click to browse files</p>
+                                    <p class="small text-muted">Supported formats: PDF, DOCX, DOC, TXT (Max 10MB)</p>
+                                </div>
+                                <div class="file-list mt-3"></div>
+                            </div>
+                        </div>
+
+                        <!-- Or Manual Input -->
+                        <div class="mb-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <hr class="flex-grow-1">
+                                <span class="px-3 text-muted">OR</span>
+                                <hr class="flex-grow-1">
+                            </div>
+                            
+                            <label for="offer_text" class="form-label fw-bold">Paste Offer Letter Text</label>
+                            <textarea name="text" id="offer_text" class="form-control" rows="10" 
+                                      placeholder="Paste your offer letter text here if you don't have a file..."></textarea>
+                        </div>
+
+                        <!-- Additional Context -->
+                        <div class="mb-4">
+                            <label for="context" class="form-label fw-bold">Additional Context (Optional)</label>
+                            <textarea name="context" id="context" class="form-control" rows="3" 
+                                      placeholder="Any additional information about the role, company, or your expectations..."></textarea>
+                            <div class="form-text">This helps provide more personalized analysis and recommendations.</div>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-search me-2"></i>Analyze Offer Letter
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Analysis Results (Initially Hidden) -->
+            <div id="analysis-results" class="d-none">
+                <!-- Key Information -->
+                <div class="card shadow-lg mb-4">
+                    <div class="card-header">
+                        <h4 class="mb-0">
+                            <i class="fas fa-info-circle me-2"></i>Key Information
+                        </h4>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="stats-card">
+                                    <div class="stats-number" id="ctc-amount">₹0</div>
+                                    <div class="stats-label">CTC (Cost to Company)</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="stats-card">
+                                    <div class="stats-number" id="probation-period">0 months</div>
+                                    <div class="stats-label">Probation Period</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="stats-card">
+                                    <div class="stats-number" id="notice-period">0 days</div>
+                                    <div class="stats-label">Notice Period</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Risk Assessment -->
+                <div class="card shadow-lg mb-4">
+                    <div class="card-header">
+                        <h4 class="mb-0">
+                            <i class="fas fa-exclamation-triangle me-2"></i>Risk Assessment
+                        </h4>
+                    </div>
+                    <div class="card-body p-4">
+                        <div id="risk-flags-container">
+                            <!-- Risk flags will be displayed here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detailed Analysis -->
+                <div class="card shadow-lg mb-4">
+                    <div class="card-header">
+                        <h4 class="mb-0">
+                            <i class="fas fa-chart-bar me-2"></i>Detailed Analysis
+                        </h4>
+                    </div>
+                    <div class="card-body p-4">
+                        <div id="detailed-analysis">
+                            <!-- Detailed analysis will be displayed here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recommendations -->
+                <div class="card shadow-lg mb-4">
+                    <div class="card-header">
+                        <h4 class="mb-0">
+                            <i class="fas fa-lightbulb me-2"></i>Recommendations
+                        </h4>
+                    </div>
+                    <div class="card-body p-4">
+                        <div id="recommendations-container">
+                            <!-- Recommendations will be displayed here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="text-center mb-5">
+                    <a href="{% url 'cover_letter' %}" class="btn btn-success btn-lg me-3">
+                        <i class="fas fa-envelope me-2"></i>Generate Cover Letter
+                    </a>
+                    <a href="{% url 'job_matching' %}" class="btn btn-outline-primary btn-lg me-3">
+                        <i class="fas fa-search me-2"></i>Find More Jobs
+                    </a>
+                    <button class="btn btn-outline-warning btn-lg" onclick="downloadAnalysis()">
+                        <i class="fas fa-download me-2"></i>Download Report
+                    </button>
+                </div>
+            </div>
+
+            <!-- Sample Offer Letters -->
+            <div class="card shadow-lg">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-lightbulb me-2"></i>Sample Offer Letters
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <p class="text-muted mb-3">Try these sample offer letters to test the analysis system:</p>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="card border">
+                                <div class="card-body">
+                                    <h6 class="card-title">Standard Tech Offer</h6>
+                                    <p class="card-text small">₹8,00,000 CTC, 6 months probation, standard benefits</p>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="loadSampleOffer('standard-tech')">
+                                        Use This
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card border">
+                                <div class="card-body">
+                                    <h6 class="card-title">Startup Offer</h6>
+                                    <p class="card-text small">₹6,00,000 CTC, equity options, flexible terms</p>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="loadSampleOffer('startup')">
+                                        Use This
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card border">
+                                <div class="card-body">
+                                    <h6 class="card-title">Senior Role Offer</h6>
+                                    <p class="card-text small">₹15,00,000 CTC, leadership role, comprehensive benefits</p>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="loadSampleOffer('senior-role')">
+                                        Use This
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card border">
+                                <div class="card-body">
+                                    <h6 class="card-title">Contract Offer</h6>
+                                    <p class="card-text small">₹12,00,000 CTC, 1-year contract, project-based</p>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="loadSampleOffer('contract')">
+                                        Use This
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Processing Modal -->
+<div class="modal fade" id="processingModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center p-4">
+                <div class="loading-spinner mb-3"></div>
+                <h5>Analyzing Offer Letter</h5>
+                <p class="text-muted">Our AI is analyzing the terms, conditions, and potential risks...</p>
+                <div class="progress">
+                    <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Sample offer letters
+const sampleOffers = {
+    'standard-tech': {
+        text: `Dear John Doe,
+
+We are pleased to offer you the position of Senior Software Engineer at TechCorp Inc.
+
+COMPENSATION:
+- Annual CTC: ₹8,00,000
+- Basic Salary: ₹4,00,000
+- HRA: ₹1,60,000
+- Special Allowance: ₹2,40,000
+
+TERMS AND CONDITIONS:
+- Probation Period: 6 months
+- Notice Period: 60 days
+- Working Hours: 9 AM - 6 PM (Monday to Friday)
+- Location: Bangalore, India
+
+BENEFITS:
+- Health Insurance
+- Provident Fund
+- Annual Leave: 21 days
+- Sick Leave: 12 days
+
+Please sign and return this offer letter within 7 days.
+
+Best regards,
+HR Team
+TechCorp Inc.`
+    },
+    'startup': {
+        text: `Dear Jane Smith,
+
+Congratulations! We're excited to offer you the role of Full Stack Developer at StartupXYZ.
+
+COMPENSATION:
+- Annual CTC: ₹6,00,000
+- Base Salary: ₹3,00,000
+- Performance Bonus: Up to ₹2,00,000
+- Equity Options: 0.1% of company shares
+
+TERMS:
+- Probation: 3 months
+- Notice: 30 days
+- Flexible working hours
+- Remote work options
+
+BENEFITS:
+- Health coverage
+- Learning budget
+- Stock options
+- Flexible PTO
+
+We look forward to having you on board!
+
+Best,
+Founding Team
+StartupXYZ`
+    },
+    'senior-role': {
+        text: `Dear Michael Johnson,
+
+We are delighted to offer you the position of Engineering Manager at EnterpriseCorp.
+
+COMPENSATION PACKAGE:
+- Annual CTC: ₹15,00,000
+- Base Salary: ₹8,00,000
+- Performance Bonus: ₹4,00,000
+- Stock Options: ₹3,00,000
+
+EMPLOYMENT TERMS:
+- Probation Period: 3 months
+- Notice Period: 90 days
+- Leadership role with team of 10 engineers
+- Strategic decision-making responsibilities
+
+COMPREHENSIVE BENEFITS:
+- Premium health insurance for family
+- Life insurance coverage
+- Professional development budget
+- Annual leave: 25 days
+- Executive benefits package
+
+Please review and respond within 10 days.
+
+Regards,
+VP Engineering
+EnterpriseCorp`
+    },
+    'contract': {
+        text: `Dear Sarah Wilson,
+
+We are pleased to offer you a contract position as Senior Consultant at ConsultCorp.
+
+CONTRACT DETAILS:
+- Duration: 12 months (renewable)
+- Annual CTC: ₹12,00,000
+- Monthly payment: ₹1,00,000
+- Project-based deliverables
+
+TERMS:
+- No probation period
+- 30 days notice for termination
+- Independent contractor status
+- No employee benefits
+
+SCOPE:
+- Lead technical architecture
+- Mentor junior developers
+- Deliver project milestones
+- Client interaction
+
+Please confirm your acceptance within 5 days.
+
+Best regards,
+Project Manager
+ConsultCorp`
+    }
+};
+
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('offer-analysis-form');
+    const resultsSection = document.getElementById('analysis-results');
+    const processingModal = new bootstrap.Modal(document.getElementById('processingModal'));
+
+    // Form submission
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Show processing modal
+        processingModal.show();
+        
+        // Simulate progress
+        const progressBar = document.querySelector('#processingModal .progress-bar');
+        let progress = 0;
+        const interval = setInterval(() => {
+            progress += Math.random() * 15;
+            if (progress >= 100) {
+                progress = 100;
+                clearInterval(interval);
+            }
+            progressBar.style.width = progress + '%';
+        }, 200);
+        
+        // Submit form
+        const formData = new FormData(form);
+        
+        fetch('{% url "offer_analysis" %}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            clearInterval(interval);
+            progressBar.style.width = '100%';
+            
+            setTimeout(() => {
+                processingModal.hide();
+                
+                if (data.success) {
+                    displayAnalysisResults(data);
+                    PlacementPartner.showAlert('success', 'Offer analysis completed!');
+                } else {
+                    PlacementPartner.showAlert('danger', data.message || 'An error occurred. Please try again.');
+                }
+            }, 1000);
+        })
+        .catch(error => {
+            clearInterval(interval);
+            processingModal.hide();
+            console.error('Error:', error);
+            PlacementPartner.showAlert('danger', 'An error occurred. Please try again.');
+        });
+    });
+
+    function displayAnalysisResults(data) {
+        // Update key information
+        document.getElementById('ctc-amount').textContent = data.ctc || '₹0';
+        document.getElementById('probation-period').textContent = data.probation_period || '0 months';
+        document.getElementById('notice-period').textContent = data.notice_period || '0 days';
+        
+        // Display risk flags
+        const riskContainer = document.getElementById('risk-flags-container');
+        riskContainer.innerHTML = '';
+        
+        if (data.risk_flags && data.risk_flags.length > 0) {
+            data.risk_flags.forEach(flag => {
+                const riskDiv = document.createElement('div');
+                riskDiv.className = 'risk-flag';
+                riskDiv.innerHTML = `<i class="fas fa-exclamation-triangle me-2"></i>${flag}`;
+                riskContainer.appendChild(riskDiv);
+            });
+        } else {
+            riskContainer.innerHTML = '<p class="text-success"><i class="fas fa-check-circle me-2"></i>No significant risks identified</p>';
+        }
+        
+        // Display detailed analysis
+        const analysisContainer = document.getElementById('detailed-analysis');
+        analysisContainer.innerHTML = `
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Compensation Analysis</h5>
+                    <p>${data.compensation_analysis || 'Analysis not available'}</p>
+                </div>
+                <div class="col-md-6">
+                    <h5>Terms & Conditions</h5>
+                    <p>${data.terms_analysis || 'Analysis not available'}</p>
+                </div>
+            </div>
+            <div class="mt-4">
+                <h5>Overall Assessment</h5>
+                <p>${data.explanation || 'Analysis completed successfully.'}</p>
+            </div>
+        `;
+        
+        // Display recommendations
+        const recommendationsContainer = document.getElementById('recommendations-container');
+        recommendationsContainer.innerHTML = `
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Negotiation Points</h5>
+                    <ul id="negotiation-points">
+                        ${data.negotiation_points ? data.negotiation_points.map(point => 
+                            `<li class="mb-2"><i class="fas fa-arrow-right text-primary me-2"></i>${point}</li>`
+                        ).join('') : '<li class="text-muted">No specific negotiation points identified</li>'}
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h5>Questions to Ask</h5>
+                    <ul id="questions-to-ask">
+                        ${data.questions_to_ask ? data.questions_to_ask.map(question => 
+                            `<li class="mb-2"><i class="fas fa-arrow-right text-primary me-2"></i>${question}</li>`
+                        ).join('') : '<li class="text-muted">No specific questions identified</li>'}
+                    </ul>
+                </div>
+            </div>
+        `;
+        
+        // Show results
+        resultsSection.classList.remove('d-none');
+        resultsSection.scrollIntoView({ behavior: 'smooth' });
+    }
+});
+
+// Load sample offer letters
+function loadSampleOffer(offerType) {
+    const offer = sampleOffers[offerType];
+    if (offer) {
+        document.getElementById('offer_text').value = offer.text;
+        
+        PlacementPartner.showAlert('info', 'Sample offer letter loaded! You can now analyze it.');
+    }
+}
+
+// Download analysis report
+function downloadAnalysis() {
+    const analysisData = {
+        ctc: document.getElementById('ctc-amount').textContent,
+        probation: document.getElementById('probation-period').textContent,
+        notice: document.getElementById('notice-period').textContent,
+        risks: Array.from(document.querySelectorAll('.risk-flag')).map(el => el.textContent.trim()),
+        analysis: document.getElementById('detailed-analysis').textContent
+    };
+    
+    const report = `Offer Letter Analysis Report
+
+Key Information:
+- CTC: ${analysisData.ctc}
+- Probation Period: ${analysisData.probation}
+- Notice Period: ${analysisData.notice}
+
+Risk Assessment:
+${analysisData.risks.map(risk => `- ${risk}`).join('\n')}
+
+Detailed Analysis:
+${analysisData.analysis}
+
+Generated by Placement Partner
+Date: ${new Date().toLocaleDateString()}`;
+    
+    const element = document.createElement('a');
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(report));
+    element.setAttribute('download', 'Offer_Analysis_Report.txt');
+    element.style.display = 'none';
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+    
+    PlacementPartner.showAlert('success', 'Analysis report downloaded!');
+}
+</script>
+{% endblock %} 

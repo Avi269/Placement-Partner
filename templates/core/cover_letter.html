@@ -1,0 +1,321 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Cover Letter Generator - Placement Partner{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Page Header -->
+            <div class="text-center mb-5">
+                <h1 class="display-5 fw-bold mb-3">Cover Letter Generator</h1>
+                <p class="lead text-muted">Create compelling, job-specific cover letters with AI assistance</p>
+            </div>
+
+            <!-- Cover Letter Form -->
+            <div class="card shadow-lg mb-4">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-envelope me-2"></i>Generate Cover Letter
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" data-validate="true" id="cover-letter-form">
+                        {% csrf_token %}
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label for="job_title" class="form-label fw-bold">Job Title</label>
+                                <input type="text" name="job_title" id="job_title" class="form-control" 
+                                       placeholder="e.g., Senior Software Engineer" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="company_name" class="form-label fw-bold">Company Name</label>
+                                <input type="text" name="company_name" id="company_name" class="form-control" 
+                                       placeholder="e.g., Google, Microsoft" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="job_description" class="form-label fw-bold">Job Description</label>
+                            <textarea name="job_description" id="job_description" class="form-control" rows="6" 
+                                      placeholder="Paste the job description here..." required></textarea>
+                            <div class="form-text">Include key requirements and responsibilities for better customization.</div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label for="applicant_name" class="form-label fw-bold">Your Name</label>
+                                <input type="text" name="applicant_name" id="applicant_name" class="form-control" 
+                                       placeholder="Your full name" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="applicant_email" class="form-label fw-bold">Your Email</label>
+                                <input type="email" name="applicant_email" id="applicant_email" class="form-control" 
+                                       placeholder="your.email@example.com" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="resume_text" class="form-label fw-bold">Resume Summary</label>
+                            <textarea name="resume_text" id="resume_text" class="form-control" rows="4" 
+                                      placeholder="Brief summary of your relevant experience and skills..."></textarea>
+                            <div class="form-text">Optional: Provide key points from your resume to personalize the cover letter.</div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="custom_prompt" class="form-label fw-bold">Custom Instructions</label>
+                            <textarea name="custom_prompt" id="custom_prompt" class="form-control" rows="3" 
+                                      placeholder="Any specific instructions or tone preferences for the cover letter..."></textarea>
+                            <div class="form-text">Optional: Specify tone, focus areas, or special requirements.</div>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-magic me-2"></i>Generate Cover Letter
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Generated Cover Letter (Initially Hidden) -->
+            <div id="cover-letter-result" class="d-none">
+                <div class="card shadow-lg mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">
+                            <i class="fas fa-file-alt me-2"></i>Generated Cover Letter
+                        </h4>
+                        <div>
+                            <button class="btn btn-outline-primary btn-sm me-2" onclick="copyToClipboard()">
+                                <i class="fas fa-copy me-1"></i>Copy
+                            </button>
+                            <button class="btn btn-outline-success btn-sm" onclick="downloadCoverLetter()">
+                                <i class="fas fa-download me-1"></i>Download
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="cover-letter-preview" id="cover-letter-preview">
+                            <!-- Generated content will appear here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="text-center mb-5">
+                    <button class="btn btn-warning btn-lg me-3" onclick="regenerateCoverLetter()">
+                        <i class="fas fa-redo me-2"></i>Regenerate
+                    </button>
+                    <a href="{% url 'job_matching' %}" class="btn btn-outline-primary btn-lg me-3">
+                        <i class="fas fa-search me-2"></i>Find More Jobs
+                    </a>
+                    <a href="{% url 'offer_analysis' %}" class="btn btn-outline-success btn-lg">
+                        <i class="fas fa-file-contract me-2"></i>Analyze Offers
+                    </a>
+                </div>
+            </div>
+
+            <!-- Tips Section -->
+            <div class="card shadow-lg">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-lightbulb me-2"></i>Cover Letter Tips
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <h5><i class="fas fa-check-circle text-success me-2"></i>Do's</h5>
+                            <ul class="list-unstyled">
+                                <li class="mb-2"><i class="fas fa-arrow-right text-primary me-2"></i>Customize for each job</li>
+                                <li class="mb-2"><i class="fas fa-arrow-right text-primary me-2"></i>Highlight relevant experience</li>
+                                <li class="mb-2"><i class="fas fa-arrow-right text-primary me-2"></i>Show enthusiasm for the role</li>
+                                <li class="mb-2"><i class="fas fa-arrow-right text-primary me-2"></i>Keep it concise (1 page max)</li>
+                                <li class="mb-2"><i class="fas fa-arrow-right text-primary me-2"></i>Proofread carefully</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h5><i class="fas fa-times-circle text-danger me-2"></i>Don'ts</h5>
+                            <ul class="list-unstyled">
+                                <li class="mb-2"><i class="fas fa-arrow-right text-warning me-2"></i>Use generic templates</li>
+                                <li class="mb-2"><i class="fas fa-arrow-right text-warning me-2"></i>Repeat resume verbatim</li>
+                                <li class="mb-2"><i class="fas fa-arrow-right text-warning me-2"></i>Focus on what you want</li>
+                                <li class="mb-2"><i class="fas fa-arrow-right text-warning me-2"></i>Include irrelevant information</li>
+                                <li class="mb-2"><i class="fas fa-arrow-right text-warning me-2"></i>Use overly formal language</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Processing Modal -->
+<div class="modal fade" id="processingModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center p-4">
+                <div class="loading-spinner mb-3"></div>
+                <h5>Generating Cover Letter</h5>
+                <p class="text-muted">Our AI is crafting a personalized cover letter for you...</p>
+                <div class="progress">
+                    <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('cover-letter-form');
+    const resultSection = document.getElementById('cover-letter-result');
+    const processingModal = new bootstrap.Modal(document.getElementById('processingModal'));
+
+    // Form submission
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Show processing modal
+        processingModal.show();
+        
+        // Simulate progress
+        const progressBar = document.querySelector('#processingModal .progress-bar');
+        let progress = 0;
+        const interval = setInterval(() => {
+            progress += Math.random() * 15;
+            if (progress >= 100) {
+                progress = 100;
+                clearInterval(interval);
+            }
+            progressBar.style.width = progress + '%';
+        }, 200);
+        
+        // Submit form
+        const formData = new FormData(form);
+        
+        fetch('{% url "cover_letter" %}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            clearInterval(interval);
+            progressBar.style.width = '100%';
+            
+            setTimeout(() => {
+                processingModal.hide();
+                
+                if (data.success) {
+                    displayCoverLetter(data.cover_letter);
+                    PlacementPartner.showAlert('success', 'Cover letter generated successfully!');
+                } else {
+                    PlacementPartner.showAlert('danger', data.message || 'An error occurred. Please try again.');
+                }
+            }, 1000);
+        })
+        .catch(error => {
+            clearInterval(interval);
+            processingModal.hide();
+            console.error('Error:', error);
+            PlacementPartner.showAlert('danger', 'An error occurred. Please try again.');
+        });
+    });
+
+    function displayCoverLetter(coverLetter) {
+        // Update preview
+        PlacementPartner.updateCoverLetterPreview(coverLetter);
+        
+        // Show result section
+        resultSection.classList.remove('d-none');
+        resultSection.scrollIntoView({ behavior: 'smooth' });
+    }
+});
+
+// Copy to clipboard
+function copyToClipboard() {
+    const coverLetterText = document.getElementById('cover-letter-preview').innerText;
+    
+    navigator.clipboard.writeText(coverLetterText).then(function() {
+        PlacementPartner.showAlert('success', 'Cover letter copied to clipboard!');
+    }, function(err) {
+        console.error('Could not copy text: ', err);
+        PlacementPartner.showAlert('danger', 'Failed to copy to clipboard');
+    });
+}
+
+// Download cover letter
+function downloadCoverLetter() {
+    const coverLetterText = document.getElementById('cover-letter-preview').innerText;
+    const jobTitle = document.getElementById('job_title').value || 'Cover Letter';
+    const companyName = document.getElementById('company_name').value || 'Company';
+    
+    const filename = `${jobTitle} - ${companyName} - Cover Letter.txt`;
+    
+    const element = document.createElement('a');
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(coverLetterText));
+    element.setAttribute('download', filename);
+    element.style.display = 'none';
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+    
+    PlacementPartner.showAlert('success', 'Cover letter downloaded!');
+}
+
+// Regenerate cover letter
+function regenerateCoverLetter() {
+    document.getElementById('cover-letter-form').dispatchEvent(new Event('submit'));
+}
+
+// Auto-fill form with sample data
+function loadSampleData() {
+    document.getElementById('job_title').value = 'Senior Software Engineer';
+    document.getElementById('company_name').value = 'TechCorp Inc.';
+    document.getElementById('job_description').value = `We are looking for a Senior Software Engineer to join our dynamic team.
+
+Requirements:
+- 5+ years of experience in software development
+- Proficiency in Python, JavaScript, and React
+- Experience with Django, AWS, and Docker
+- Strong knowledge of SQL and database design
+- Experience with CI/CD pipelines
+- Bachelor's degree in Computer Science or related field
+
+Responsibilities:
+- Develop and maintain web applications
+- Collaborate with cross-functional teams
+- Mentor junior developers
+- Participate in code reviews
+- Contribute to technical architecture decisions`;
+    
+    document.getElementById('applicant_name').value = 'John Doe';
+    document.getElementById('applicant_email').value = 'john.doe@example.com';
+    document.getElementById('resume_text').value = 'Experienced software engineer with 6+ years in full-stack development, specializing in Python, Django, and React. Led multiple successful projects and mentored junior developers.';
+    
+    PlacementPartner.showAlert('info', 'Sample data loaded! You can now generate a cover letter.');
+}
+
+// Add sample data button to form
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('cover-letter-form');
+    const submitButton = form.querySelector('button[type="submit"]');
+    
+    const sampleButton = document.createElement('button');
+    sampleButton.type = 'button';
+    sampleButton.className = 'btn btn-outline-secondary btn-lg me-3';
+    sampleButton.innerHTML = '<i class="fas fa-magic me-2"></i>Load Sample Data';
+    sampleButton.onclick = loadSampleData;
+    
+    submitButton.parentNode.insertBefore(sampleButton, submitButton);
+});
+</script>
+{% endblock %} 

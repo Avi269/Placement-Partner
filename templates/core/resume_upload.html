@@ -1,0 +1,306 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Upload Resume - Placement Partner{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Page Header -->
+            <div class="text-center mb-5">
+                <h1 class="display-5 fw-bold mb-3">Upload Your Resume</h1>
+                <p class="lead text-muted">Let our AI analyze and optimize your resume for better job opportunities</p>
+            </div>
+
+            <!-- Upload Form -->
+            <div class="card shadow-lg">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-upload me-2"></i>Resume Upload & Analysis
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" enctype="multipart/form-data" data-validate="true" id="resume-form">
+                        {% csrf_token %}
+
+                        <!-- File Upload Area -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Upload Resume File</label>
+                            <div class="file-upload-area" id="file-upload-area">
+                                <input type="file" name="resume" id="resume-file" accept=".pdf,.docx,.doc"
+                                    class="d-none">
+                                <div class="drop-text">
+                                    <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                                    <h5>Drag & Drop your resume here</h5>
+                                    <p class="text-muted mb-3">or click to browse files</p>
+                                    <p class="small text-muted">Supported formats: PDF, DOCX, DOC (Max 10MB)</p>
+                                </div>
+                                <div class="file-list mt-3"></div>
+                            </div>
+                        </div>
+
+                        <!-- Or Manual Input -->
+                        <div class="mb-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <hr class="flex-grow-1">
+                                <span class="px-3 text-muted">OR</span>
+                                <hr class="flex-grow-1">
+                            </div>
+
+                            <label class="form-label fw-bold">Paste Resume Text</label>
+                            <textarea name="parsed_text" id="resume-text" class="form-control" rows="8"
+                                placeholder="Paste your resume text here if you don't have a file..."></textarea>
+                        </div>
+
+                        <!-- Personal Information -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label for="name" class="form-label">Full Name</label>
+                                <input type="text" name="name" id="name" class="form-control"
+                                    placeholder="Enter your full name">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="email" class="form-label">Email Address</label>
+                                <input type="email" name="email" id="email" class="form-control"
+                                    placeholder="Enter your email">
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="phone" class="form-label">Phone Number</label>
+                            <input type="tel" name="phone" id="phone" class="form-control"
+                                placeholder="Enter your phone number">
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-magic me-2"></i>Analyze & Optimize Resume
+                            </button>
+                        </div>
+
+                        <div id="parsed-results" class="mt-5 d-none">
+                            <h5 class="mb-3">Resume Analysis Result</h5>
+
+                            <div class="mb-3">
+                                <label class="form-label">Extracted Name</label>
+                                <input type="text" id="result-name" class="form-control" readonly>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Extracted Email</label>
+                                <input type="email" id="result-email" class="form-control" readonly>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Extracted Phone</label>
+                                <input type="text" id="result-phone" class="form-control" readonly>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Skills</label>
+                                <div id="result-skills" class="d-flex flex-wrap gap-2"></div>
+                            </div>
+
+                            <div class="text-center mt-4">
+                                <a href="{% url 'job_matching' %}" class="btn btn-success btn-lg">
+                                    <i class="fas fa-briefcase me-2"></i>Match with Job Description
+                                </a>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+
+            <!-- Features Info -->
+            <div class="row mt-5 g-4">
+                <div class="col-md-4">
+                    <div class="text-center">
+                        <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                            style="width: 60px; height: 60px;">
+                            <i class="fas fa-brain text-white fa-lg"></i>
+                        </div>
+                        <h5>AI-Powered Parsing</h5>
+                        <p class="text-muted small">Advanced AI extracts skills, experience, and education from your
+                            resume</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="text-center">
+                        <div class="bg-success rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                            style="width: 60px; height: 60px;">
+                            <i class="fas fa-chart-line text-white fa-lg"></i>
+                        </div>
+                        <h5>ATS Optimization</h5>
+                        <p class="text-muted small">Optimize your resume to pass through Applicant Tracking Systems</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="text-center">
+                        <div class="bg-warning rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                            style="width: 60px; height: 60px;">
+                            <i class="fas fa-lightbulb text-white fa-lg"></i>
+                        </div>
+                        <h5>Smart Suggestions</h5>
+                        <p class="text-muted small">Get personalized recommendations to improve your resume</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Processing Modal -->
+<div class="modal fade" id="processingModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center p-4">
+                <div class="loading-spinner mb-3"></div>
+                <h5>Processing Your Resume</h5>
+                <p class="text-muted">Our AI is analyzing your resume and extracting key information...</p>
+                <div class="progress">
+                    <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('resume-form');
+        const fileInput = document.getElementById('resume-file');
+        const textArea = document.getElementById('resume-text');
+        const processingModal = new bootstrap.Modal(document.getElementById('processingModal'));
+
+        // Form submission
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            // Validate form
+            if (!validateResumeForm()) {
+                return false;
+            }
+
+            // Show processing modal
+            processingModal.show();
+
+            // Simulate progress
+            const progressBar = document.querySelector('#processingModal .progress-bar');
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(interval);
+                }
+                progressBar.style.width = progress + '%';
+            }, 200);
+
+            // Submit form
+            const formData = new FormData(form);
+
+            fetch('{% url "resume_upload" %}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    clearInterval(interval);
+                    progressBar.style.width = '100%';
+
+                    setTimeout(() => {
+                        processingModal.hide();
+
+                        if (data.success && data.data) {
+                            PlacementPartner.showAlert('success', 'Resume uploaded and analyzed successfully!');
+
+                            const d = data.data;
+
+                            // Show parsed data
+                            document.getElementById('parsed-results').classList.remove('d-none');
+                            document.getElementById('result-name').value = d.name || '';
+                            document.getElementById('result-email').value = d.email || '';
+                            document.getElementById('result-phone').value = d.phone || '';
+
+                            const skillsEl = document.getElementById('result-skills');
+                            skillsEl.innerHTML = '';
+                            (d.skills || []).forEach(skill => {
+                                const badge = document.createElement('span');
+                                badge.className = 'badge bg-primary me-1 mb-1';
+                                badge.textContent = skill;
+                                skillsEl.appendChild(badge);
+                            });
+
+                            // Optional: scroll to result
+                            document.getElementById('parsed-results').scrollIntoView({ behavior: 'smooth' });
+
+                        } else {
+                            PlacementPartner.showAlert('danger', data.message || 'An error occurred. Please try again.');
+                        }
+
+                    }, 1000);
+                })
+                .catch(error => {
+                    clearInterval(interval);
+                    processingModal.hide();
+                    console.error('Error:', error);
+                    PlacementPartner.showAlert('danger', 'An error occurred. Please try again.');
+                });
+        });
+
+        // File input change
+        fileInput.addEventListener('change', function (e) {
+            if (e.target.files.length > 0) {
+                // Clear text area when file is selected
+                textArea.value = '';
+            }
+        });
+
+        // Text area input
+        textArea.addEventListener('input', function (e) {
+            if (e.target.value.trim()) {
+                // Clear file input when text is entered
+                fileInput.value = '';
+            }
+        });
+
+        function validateResumeForm() {
+            let isValid = true;
+
+            // Check if either file or text is provided
+            if (!fileInput.files.length && !textArea.value.trim()) {
+                PlacementPartner.showAlert('warning', 'Please upload a resume file or paste resume text.');
+                isValid = false;
+            }
+
+            // Validate file size if file is selected
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                const maxSize = 10 * 1024 * 1024; // 10MB
+
+                if (file.size > maxSize) {
+                    PlacementPartner.showAlert('danger', 'File size must be less than 10MB.');
+                    isValid = false;
+                }
+
+                // Validate file type
+                const allowedTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/msword'];
+                if (!allowedTypes.includes(file.type)) {
+                    PlacementPartner.showAlert('danger', 'Please upload a PDF, DOCX, or DOC file.');
+                    isValid = false;
+                }
+            }
+
+            return isValid;
+        }
+    });
+</script>
+{% endblock %}
